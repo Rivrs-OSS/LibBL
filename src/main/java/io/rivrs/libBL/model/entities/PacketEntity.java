@@ -45,13 +45,14 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
     protected final int id;
     protected final UUID uniqueId;
     protected final EntityType type;
-
-    // Data
-    protected Location location;
     protected final ItemStack[] equipment = new ItemStack[6];
-
+    protected final Set<UUID> viewers = new CopyOnWriteArraySet<>();
+    // Passengers
+    protected final Set<Integer> passengersIds = new CopyOnWriteArraySet<>();
     // Metadata
     private final Set<Flag> flags = new HashSet<>();
+    // Data
+    protected Location location;
     protected int airTicks = 300;
     protected Component customName = Component.empty();
     protected boolean customNameVisible = false;
@@ -59,16 +60,10 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
     protected boolean gravity = true;
     protected Pose pose = Pose.STANDING;
     protected int frozenTicks = 0;
-
     // Viewers
     protected boolean autoViewable = true;
-    protected final Set<UUID> viewers = new CopyOnWriteArraySet<>();
-
     // State
     protected boolean alive;
-
-    // Passengers
-    protected final Set<Integer> passengersIds = new CopyOnWriteArraySet<>();
 
     public PacketEntity(EntityType type, Location location) {
         this(SpigotReflectionUtil.generateEntityId(), UUID.randomUUID(), type, location);
@@ -89,14 +84,14 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
 
     public void spawn() {
         if (this.alive
-            || !new PacketEntitySpawnEvent(this).callEvent())
+                || !new PacketEntitySpawnEvent(this).callEvent())
             return;
 
         // Detect nearby players
         if (this.autoViewable)
             for (Player player : this.location.getWorld().getPlayers()) {
                 if (player.getLocation().distanceSquared(this.location) <= LibBL.ENTITY_SIMULATION_DISTANCE_SQR()
-                    && new PacketEntityAddViewerEvent(this, player, PacketEntityAddViewerEvent.Reason.ENTITY_SPAWN).callEvent())
+                        && new PacketEntityAddViewerEvent(this, player, PacketEntityAddViewerEvent.Reason.ENTITY_SPAWN).callEvent())
                     this.viewers.add(player.getUniqueId());
             }
 
@@ -364,7 +359,7 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
     @Override
     public void addViewer(Player player) {
         if (this.isViewer(player)
-            || !new PacketEntityAddViewerEvent(this, player, PacketEntityAddViewerEvent.Reason.PLUGIN).callEvent())
+                || !new PacketEntityAddViewerEvent(this, player, PacketEntityAddViewerEvent.Reason.PLUGIN).callEvent())
             return;
 
         this.viewers.add(player.getUniqueId());
@@ -378,7 +373,7 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
     @Override
     public void removeViewer(Player viewer) {
         if (!this.isViewer(viewer)
-            || !new PacketEntityRemoveViewerEvent(this, viewer, PacketEntityRemoveViewerEvent.Reason.PLUGIN).callEvent())
+                || !new PacketEntityRemoveViewerEvent(this, viewer, PacketEntityRemoveViewerEvent.Reason.PLUGIN).callEvent())
             return;
 
         this.viewers.remove(viewer.getUniqueId());
@@ -433,16 +428,16 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
 
     protected PacketWrapper<?> buildTeleportPacket(Location newLocation, Location lastLocation) {
         if (newLocation.x() == lastLocation.x()
-            && newLocation.y() == lastLocation.y()
-            && newLocation.z() == lastLocation.z()
-            && (newLocation.getYaw() != lastLocation.getYaw()
+                && newLocation.y() == lastLocation.y()
+                && newLocation.z() == lastLocation.z()
+                && (newLocation.getYaw() != lastLocation.getYaw()
                 || newLocation.getPitch() != lastLocation.getPitch())) {
             return buildRotationPacket();
         }
 
         // Relative move packet
         if (newLocation.getWorld().equals(lastLocation.getWorld())
-            && newLocation.distance(lastLocation) < 8) {
+                && newLocation.distance(lastLocation) < 8) {
             return new WrapperPlayServerEntityRelativeMoveAndRotation(
                     this.id,
                     newLocation.getX() - lastLocation.getX(),

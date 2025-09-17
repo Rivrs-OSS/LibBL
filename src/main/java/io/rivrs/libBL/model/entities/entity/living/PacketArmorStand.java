@@ -16,10 +16,10 @@ import java.util.UUID;
 
 public class PacketArmorStand extends PacketLivingEntity {
 
-    private Vector3f headRotation= new Vector3f(0, 0, 0);
-    private Vector3f bodyRotation= new Vector3f(0, 0, 0);
+    private Vector3f headRotation = new Vector3f(0, 0, 0);
+    private Vector3f bodyRotation = new Vector3f(0, 0, 0);
     private Vector3f leftArmRotation = new Vector3f(-10, 0, -10);
-    private Vector3f rightArmRotation= new Vector3f(-15, 0, 10);
+    private Vector3f rightArmRotation = new Vector3f(-15, 0, 10);
     private Vector3f leftLegRotation = new Vector3f(-1, 0, -1);
     private Vector3f rightLegRotation = new Vector3f(1, 0, 1);
 

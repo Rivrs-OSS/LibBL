@@ -18,7 +18,7 @@ import java.util.UUID;
 public class PacketBlockDisplay extends PacketDisplay {
 
     private final BlockData blockData;
-    
+
     public PacketBlockDisplay(Location location, BlockData blockData) {
         super(EntityType.BLOCK_DISPLAY, location);
         this.blockData = blockData;
@@ -40,6 +40,6 @@ public class PacketBlockDisplay extends PacketDisplay {
         entityData.add(new EntityData<>(23, EntityDataTypes.BLOCK_STATE, SpigotConversionUtil.fromBukkitBlockData(blockData).getGlobalId()));
         return entityData;
     }
-    
-    
+
+
 }

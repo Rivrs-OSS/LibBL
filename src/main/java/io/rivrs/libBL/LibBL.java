@@ -18,6 +18,10 @@ public final class LibBL extends JavaPlugin {
 
     private EntityService entities;
 
+    public static LibBL get() {
+        return instance;
+    }
+
     @Override
     public void onEnable() {
         // Plugin startup logic
@@ -43,10 +47,5 @@ public final class LibBL extends JavaPlugin {
         this.entities.shutdown();
 
         instance = null;
-    }
-
-
-    public static LibBL get() {
-        return instance;
     }
 }

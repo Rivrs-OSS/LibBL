@@ -21,12 +21,12 @@ public abstract class PacketEntityEvent extends Event {
         this.entity = entity;
     }
 
-    @Override
-    public @NotNull HandlerList getHandlers() {
+    public static HandlerList getHandlerList() {
         return HANDLERS_LIST;
     }
 
-    public static HandlerList getHandlerList() {
+    @Override
+    public @NotNull HandlerList getHandlers() {
         return HANDLERS_LIST;
     }
 }

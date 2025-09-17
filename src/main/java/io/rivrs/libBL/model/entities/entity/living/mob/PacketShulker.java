@@ -1,10 +1,8 @@
 package io.rivrs.libBL.model.entities.entity.living.mob;
 
-import com.github.retrooper.packetevents.protocol.attribute.Attributes;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUpdateAttributes;
 import io.rivrs.libBL.model.entities.entity.living.PacketMob;
 import io.rivrs.libBL.utils.Direction;
 import lombok.Getter;
@@ -12,7 +10,6 @@ import org.bukkit.Location;
 import org.bukkit.entity.EntityType;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
