@@ -1,0 +1,5 @@
+name: LibBL
+version: '1.0-SNAPSHOT'
+main: io.rivrs.libBL.LibBL
+api-version: '1.21'
+authors: [ Reytz ]
