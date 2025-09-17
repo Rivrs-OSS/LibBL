@@ -12,4 +12,4 @@ pluginManagement {
         gradlePluginPortal()
     }
 }
-rootProject.name = 'LibBL'
+rootProject.name = 'LibBl'

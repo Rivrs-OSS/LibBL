@@ -15,6 +15,15 @@ repositories {
     }
     maven { url = uri("https://repo.codemc.io/repository/maven-releases/") }
     maven { url = uri("https://repo.codemc.io/repository/maven-snapshots/") }
+
+    maven {
+        url = property("rivrsNexusUrl") + "/repository/rivrs-release/"
+        allowInsecureProtocol = true
+        credentials {
+            username = property("rivrsNexusUsername")
+            password = property("rivrsNexusPassword")
+        }
+    }
 }
 
 dependencies {
@@ -55,7 +64,7 @@ processResources {
 
 
 publishing {
-    def releaseRepoUrl = property("rivrsNexusUrl") + "repository/rivrs-release/"
+    def releaseRepoUrl = property("rivrsNexusUrl") + "repository/rivrs-snapshot/"
 
     repositories {
         maven {
