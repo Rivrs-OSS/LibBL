@@ -3,3 +3,5 @@ version: ${project.version}
 main: io.rivrs.libbl.LibBL
 api-version: '1.21'
 authors: [ Reytz ]
+depend:
+  - packetevents
