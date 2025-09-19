@@ -2,6 +2,7 @@ package io.rivrs.libbl;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import io.rivrs.libbl.listener.EntityInteractionListener;
+import io.rivrs.libbl.listener.PlayerListener;
 import io.rivrs.libbl.service.EntityService;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -32,6 +33,8 @@ public final class LibBL extends JavaPlugin {
 
         this.entities = new EntityService(this);
         this.entities.init();
+
+        new PlayerListener(this, this.entities);
 
         // Listeners
         PacketEvents.getAPI().getEventManager().registerListener(new EntityInteractionListener(this));
