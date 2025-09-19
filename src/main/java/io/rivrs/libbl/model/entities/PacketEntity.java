@@ -322,6 +322,11 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
             sendPacket(buildSetPassengersPacket());
     }
 
+    public void removePassenger(int entityId) {
+        if (this.passengersIds.remove(entityId))
+            sendPacket(buildSetPassengersPacket());
+    }
+
     public void addVelocity(Vector3d velocity) {
         this.velocity = velocity;
         if(alive){
