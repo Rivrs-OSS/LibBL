@@ -18,7 +18,7 @@ import java.util.UUID;
 @Getter
 public class PacketItemDisplay extends PacketDisplay {
 
-    private final ItemStack itemStack;
+    private ItemStack itemStack;
     private ItemDisplay.ItemDisplayTransform displayTransform = ItemDisplay.ItemDisplayTransform.NONE;
 
     public PacketItemDisplay(Location location, ItemStack itemStack) {
@@ -39,6 +39,11 @@ public class PacketItemDisplay extends PacketDisplay {
     public void displayTransform(ItemDisplay.ItemDisplayTransform displayTransform) {
         this.displayTransform = displayTransform;
 
+        this.sendPacket(this.buildMetadataPacket());
+    }
+
+    public void itemstack(ItemStack itemStack) {
+        this.itemStack = itemStack;
         this.sendPacket(this.buildMetadataPacket());
     }
 
