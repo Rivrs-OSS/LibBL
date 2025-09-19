@@ -7,6 +7,7 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityMetadataProvider;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.protocol.player.Equipment;
+import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
@@ -49,6 +50,8 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
     protected final Set<UUID> viewers = new CopyOnWriteArraySet<>();
     // Passengers
     protected final Set<Integer> passengersIds = new CopyOnWriteArraySet<>();
+    // Velocity
+    protected Vector3d velocity;
     // Metadata
     private final Set<Flag> flags = new HashSet<>();
     // Data
@@ -120,7 +123,8 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
             packets.add(this.buildEquipmentPacket());
         if (this.hasPassengers())
             packets.add(this.buildSetPassengersPacket());
-
+        if(velocity != null)
+            packets.add(this.buildVelocityPacket());
         return packets;
     }
 
@@ -318,6 +322,13 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
             sendPacket(buildSetPassengersPacket());
     }
 
+    public void addVelocity(Vector3d velocity) {
+        this.velocity = velocity;
+        if(alive){
+            sendPacket(buildVelocityPacket());
+        }
+    }
+
     public void rotateHead(Player player, float yaw) {
         this.location.setYaw(yaw);
         this.sendPacket(player, new WrapperPlayServerEntityHeadLook(
@@ -495,6 +506,18 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
                 this.passengersIds.stream().mapToInt(i -> i).toArray()
         );
     }
+
+    protected PacketWrapper<WrapperPlayServerEntityVelocity> buildVelocityPacket() {
+        if(this.velocity == null)
+            return null;
+        Vector3d buffer = this.velocity;
+        this.velocity = null;
+        return new WrapperPlayServerEntityVelocity(
+                this.id,
+                buffer
+        );
+    }
+
 
     public void updateMetadata() {
         this.sendPacket(this.buildMetadataPacket());
