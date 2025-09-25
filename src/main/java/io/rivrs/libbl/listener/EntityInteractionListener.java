@@ -30,6 +30,12 @@ public class EntityInteractionListener extends SimplePacketListenerAbstract {
                     event.setCancelled(true);
 
                     Player player = event.getPlayer();
+
+                    if(packetEntity.location().distanceSquared(player.getLocation()) > 20){
+                        // Too far away, the packet is likely spoofed and we ignore it
+                        return;
+                    }
+
                     MainHand hand = packet.getHand().equals(InteractionHand.MAIN_HAND) ? MainHand.RIGHT : MainHand.LEFT;
 
                     if (packet.getAction().equals(WrapperPlayClientInteractEntity.InteractAction.ATTACK)) {
