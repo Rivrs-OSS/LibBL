@@ -49,7 +49,7 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
     protected final ItemStack[] equipment = new ItemStack[6];
     protected final Set<UUID> viewers = new CopyOnWriteArraySet<>();
     // Passengers
-    protected final Set<Integer> passengersIds = new CopyOnWriteArraySet<>();
+    protected final Set<PacketEntity> passengersIds = new CopyOnWriteArraySet<>();
     // Velocity
     protected Vector3d velocity;
     // Metadata
@@ -121,8 +121,12 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
         packets.add(this.buildMetadataPacket());
         if (this.hasEquipment())
             packets.add(this.buildEquipmentPacket());
-        if (this.hasPassengers())
-            packets.add(this.buildSetPassengersPacket());
+        // Passengers packet has to be sent after the entity spawn packet, otherwise it won't work
+        Bukkit.getScheduler().runTaskAsynchronously(LibBL.get(), () -> {
+            if (this.hasPassengers()){
+                this.sendPacket(player, this.buildSetPassengersPacket());
+            }
+        });
         if(velocity != null)
             packets.add(this.buildVelocityPacket());
         return packets;
@@ -317,13 +321,13 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
             sendPacket(buildEquipmentPacket());
     }
 
-    public void addPassenger(int entityId) {
-        if (this.passengersIds.add(entityId))
+    public void addPassenger(PacketEntity entity) {
+        if (this.passengersIds.add(entity))
             sendPacket(buildSetPassengersPacket());
     }
 
-    public void removePassenger(int entityId) {
-        if (this.passengersIds.remove(entityId))
+    public void removePassenger(PacketEntity entity) {
+        if (this.passengersIds.remove(entity))
             sendPacket(buildSetPassengersPacket());
     }
 
@@ -508,7 +512,7 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
     protected PacketWrapper<WrapperPlayServerSetPassengers> buildSetPassengersPacket() {
         return new WrapperPlayServerSetPassengers(
                 this.id,
-                this.passengersIds.stream().mapToInt(i -> i).toArray()
+                this.passengersIds.stream().mapToInt(i -> i.id).toArray()
         );
     }
 
