@@ -141,6 +141,15 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
         this.sendPacket(player, this.buildTeleportPacket(location));
     }
 
+    public void forceTeleport(Location location, boolean onGround) {
+        this.sendPacket(new WrapperPlayServerEntityTeleport(
+                this.id,
+                SpigotConversionUtil.fromBukkitLocation(location.clone()),
+                onGround
+        ));
+        this.location = location.clone();
+    }
+
     public void teleport(Player player, Location location, Location lastLocation) {
         this.sendPacket(player, this.buildTeleportPacket(location, lastLocation));
     }
