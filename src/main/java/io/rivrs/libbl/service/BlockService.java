@@ -55,7 +55,7 @@ public class BlockService {
         }
         this.fakeBlocks.put(fakeBlock.uniqueID(), fakeBlock);
         Map<Vector2i, List<UUID>> worldBlocks = this.worldChunkUUIDMap.computeIfAbsent(fakeBlock.worldName(), k -> new ConcurrentHashMap<>());
-        Vector2i chunkPos = new Vector2i(fakeBlock.location().getChunk().getX(), fakeBlock.location().getChunk().getZ());
+        Vector2i chunkPos = new Vector2i(fakeBlock.position().x >> 4, fakeBlock.position().z >> 4);
         List<UUID> worldBlockList = worldBlocks.computeIfAbsent(chunkPos, k -> new CopyOnWriteArrayList<>());
         worldBlockList.add(fakeBlock.uniqueID());
         worldBlocks.put(chunkPos, worldBlockList);
