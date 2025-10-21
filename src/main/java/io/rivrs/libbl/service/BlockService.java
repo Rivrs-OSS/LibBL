@@ -4,6 +4,7 @@ import com.github.retrooper.packetevents.util.Vector3i;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import io.rivrs.libbl.LibBL;
 import io.rivrs.libbl.model.block.FakeBlock;
+import io.rivrs.libbl.utils.ThreadSafeLong2ObjectMap;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -12,7 +13,6 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
-import org.joml.Vector2i;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +26,7 @@ public class BlockService {
     private final Map<UUID, FakeBlock> fakeBlocks = new ConcurrentHashMap<>();
     private final Map<Location, UUID> positionUUIDMap = new ConcurrentHashMap<>();
 
-    private final Map<String, Map<Vector2i, List<UUID>>> worldChunkUUIDMap = new ConcurrentHashMap<>();
+    private final Map<String, ThreadSafeLong2ObjectMap<List<UUID>>> worldChunkUUIDMap = new ConcurrentHashMap<>();
 
     private final ConcurrentHashMap<BlockData, Integer> dataStateCache = new ConcurrentHashMap<>();
 
@@ -54,11 +54,12 @@ public class BlockService {
             }
         }
         this.fakeBlocks.put(fakeBlock.uniqueID(), fakeBlock);
-        Map<Vector2i, List<UUID>> worldBlocks = this.worldChunkUUIDMap.computeIfAbsent(fakeBlock.worldName(), k -> new ConcurrentHashMap<>());
-        Vector2i chunkPos = new Vector2i(fakeBlock.position().x >> 4, fakeBlock.position().z >> 4);
-        List<UUID> worldBlockList = worldBlocks.computeIfAbsent(chunkPos, k -> new CopyOnWriteArrayList<>());
-        worldBlockList.add(fakeBlock.uniqueID());
-        worldBlocks.put(chunkPos, worldBlockList);
+
+        long chunkLong = ((long) (fakeBlock.position().z >> 4) << 32) | ((fakeBlock.position().x >> 4) & 0xFFFFFFFFL);
+        ThreadSafeLong2ObjectMap<List<UUID>> worldBlocks = this.worldChunkUUIDMap.computeIfAbsent(fakeBlock.worldName(), k -> new ThreadSafeLong2ObjectMap<>( new CopyOnWriteArrayList<>()));
+        List<UUID> chunkBlockList = worldBlocks.get(chunkLong);
+        chunkBlockList.add(fakeBlock.uniqueID());
+        worldBlocks.put(chunkLong, chunkBlockList);
         this.worldChunkUUIDMap.put(fakeBlock.worldName(), worldBlocks);
 
         this.positionUUIDMap.put(fakeBlock.location(), fakeBlock.uniqueID());
@@ -68,17 +69,15 @@ public class BlockService {
         fakeBlock.remove();
         this.fakeBlocks.remove(fakeBlock.uniqueID());
         this.positionUUIDMap.remove(fakeBlock.location());
-        Map<Vector2i, List<UUID>> worldBlocksMap = this.worldChunkUUIDMap.get(fakeBlock.worldName());
-        if (worldBlocksMap != null) {
-            Vector2i chunkPos = new Vector2i(fakeBlock.position().x >> 4, fakeBlock.position().z >> 4);
-            List<UUID> chunkBlockList = worldBlocksMap.get(chunkPos);
+        ThreadSafeLong2ObjectMap<List<UUID>> worldBlocks = this.worldChunkUUIDMap.get(fakeBlock.worldName());
+        if (worldBlocks != null) {
+            long chunkLong = ((long) (fakeBlock.position().z >> 4) << 32) | ((fakeBlock.position().x >> 4) & 0xFFFFFFFFL);
+            List<UUID> chunkBlockList = worldBlocks.get(chunkLong);
             if (chunkBlockList != null) {
                 chunkBlockList.remove(fakeBlock.uniqueID());
-                worldBlocksMap.put(chunkPos, chunkBlockList);
+                worldBlocks.put(chunkLong, chunkBlockList);
+                this.worldChunkUUIDMap.put(fakeBlock.worldName(), worldBlocks);
             }
-
-
-            this.worldChunkUUIDMap.put(fakeBlock.worldName(), worldBlocksMap);
         }
     }
 
@@ -96,7 +95,7 @@ public class BlockService {
         return Optional.ofNullable(fakeBlock);
     }
 
-    public Optional<FakeBlock> findByWorldNameAndPositon(String worldName, int x, int y, int z) {
+    public Optional<FakeBlock> findByWorldNameAndPosition(String worldName, int x, int y, int z) {
         World world = Bukkit.getWorld(worldName);
         if (world == null) {
             return Optional.empty();
@@ -108,9 +107,10 @@ public class BlockService {
     public List<FakeBlock> findByChunk(int chunkX, int chunkZ, World world) {
         List<FakeBlock> blocksInChunk = new ArrayList<>();
 
-        Map<Vector2i, List<UUID>> worldBlocks = this.worldChunkUUIDMap.get(world.getName());
+        long chunkLong = ((long) chunkZ << 32) | (chunkX & 0xFFFFFFFFL);
+        ThreadSafeLong2ObjectMap<List<UUID>> worldBlocks = this.worldChunkUUIDMap.get(world.getName());
         if (worldBlocks != null) {
-            List<UUID> chunkBlockUUIDs = worldBlocks.get(new Vector2i(chunkX, chunkZ));
+            List<UUID> chunkBlockUUIDs = worldBlocks.get(chunkLong);
             if (chunkBlockUUIDs != null) {
                 for (UUID uuid : chunkBlockUUIDs) {
                     FakeBlock block = this.fakeBlocks.get(uuid);
@@ -130,9 +130,9 @@ public class BlockService {
 
     public List<FakeBlock> findByWorldName(String worldName) {
         List<FakeBlock> blocksInWorld = new ArrayList<>();
-        Collection<List<UUID>> worldBlockUUIDs = this.worldChunkUUIDMap.get(worldName).values();
-        worldBlockUUIDs.forEach(worldBlockList -> {
-            for (UUID uuid : worldBlockList) {
+        ThreadSafeLong2ObjectMap<List<UUID>> worldBlockUUIDs = this.worldChunkUUIDMap.get(worldName);
+        worldBlockUUIDs.forEach((key, value) -> {
+            for (UUID uuid : value) {
                 FakeBlock block = this.fakeBlocks.get(uuid);
                 if (block != null) {
                     blocksInWorld.add(block);
@@ -167,7 +167,7 @@ public class BlockService {
     public void cleanUpWorld(String worldName) {
         if (!this.worldChunkUUIDMap.containsKey(worldName))
             return;
-        Map<Vector2i, List<UUID>> chunkMap = this.worldChunkUUIDMap.get(worldName);
+        ThreadSafeLong2ObjectMap<List<UUID>> chunkMap = this.worldChunkUUIDMap.get(worldName);
         World world = Bukkit.getWorld(worldName);
         if (world == null) {
             chunkMap.forEach((chunkPos, uuidList) -> {

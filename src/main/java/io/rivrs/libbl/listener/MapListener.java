@@ -92,7 +92,7 @@ public class MapListener implements PacketListener {
             if (!plugin.blockService().existsAtWorld(world))
                 return;
 
-            FakeBlock fakeBlock = plugin.blockService().findByWorldNameAndPositon(
+            FakeBlock fakeBlock = plugin.blockService().findByWorldNameAndPosition(
                     world.getName(),
                     packet.getBlockPosition().getX(),
                     packet.getBlockPosition().getY(),
