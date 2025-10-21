@@ -4,9 +4,12 @@ import io.rivrs.libbl.LibBL;
 import io.rivrs.libbl.model.entities.PacketEntity;
 import io.rivrs.libbl.service.EntityService;
 import lombok.RequiredArgsConstructor;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
+
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public class EntityVisibilityTask extends BukkitRunnable {
@@ -21,11 +24,22 @@ public class EntityVisibilityTask extends BukkitRunnable {
                 continue;
 
             Location location = entity.location();
+            if(location == null)
+                continue;
+            if(!location.isWorldLoaded())
+                continue;
+            if(location.getWorld() == null)
+                continue;
             if (!location.isChunkLoaded())
-                return;
+                continue;
 
             // Remove viewers that are too far away
-            for (Player viewer : entity.viewersAsPlayers()) {
+            for (UUID uuid : entity.viewers()) {
+                Player viewer = Bukkit.getPlayer(uuid);
+                if (viewer == null || !viewer.isOnline()){
+                    entity.removeViewer(viewer);
+                    continue;
+                }
                 if (!viewer.getWorld().equals(location.getWorld())
                         || viewer.getLocation().distanceSquared(location) >= LibBL.ENTITY_SIMULATION_DISTANCE_SQR())
                     entity.removeViewer(viewer);
