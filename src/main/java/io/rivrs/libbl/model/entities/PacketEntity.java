@@ -50,10 +50,10 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
     protected final Set<UUID> viewers = new CopyOnWriteArraySet<>();
     // Passengers
     protected final Set<PacketEntity> passengersIds = new CopyOnWriteArraySet<>();
-    // Velocity
-    protected Vector3d velocity;
     // Metadata
     private final Set<Flag> flags = new HashSet<>();
+    // Velocity
+    protected Vector3d velocity;
     // Data
     protected Location location;
     protected int airTicks = 300;
@@ -123,11 +123,11 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
             packets.add(this.buildEquipmentPacket());
         // Passengers packet has to be sent after the entity spawn packet, otherwise it won't work
         Bukkit.getScheduler().runTaskAsynchronously(LibBL.get(), () -> {
-            if (this.hasPassengers()){
+            if (this.hasPassengers()) {
                 this.sendPacket(player, this.buildSetPassengersPacket());
             }
         });
-        if(velocity != null)
+        if (velocity != null)
             packets.add(this.buildVelocityPacket());
         return packets;
     }
@@ -342,7 +342,7 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
 
     public void addVelocity(Vector3d velocity) {
         this.velocity = velocity;
-        if(alive){
+        if (alive) {
             sendPacket(buildVelocityPacket());
         }
     }
@@ -526,7 +526,7 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
     }
 
     protected PacketWrapper<WrapperPlayServerEntityVelocity> buildVelocityPacket() {
-        if(this.velocity == null)
+        if (this.velocity == null)
             return null;
         Vector3d buffer = this.velocity;
         this.velocity = null;
@@ -570,7 +570,7 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
         if (!alive)
             return;
 
-        if(channel instanceof Player player){
+        if (channel instanceof Player player) {
             channel = LibBL.get().viewerService().getPlayerChannel(player.getUniqueId());
         }
 

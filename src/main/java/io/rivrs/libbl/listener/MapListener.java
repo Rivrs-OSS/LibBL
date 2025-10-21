@@ -13,13 +13,11 @@ import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPl
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerAcknowledgeBlockChanges;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockChange;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerChunkData;
-import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerMultiBlockChange;
 import io.rivrs.libbl.LibBL;
 import io.rivrs.libbl.event.block.FakeBlockBreakEvent;
 import io.rivrs.libbl.event.block.FakeBlockInteractEvent;
 import io.rivrs.libbl.model.block.FakeBlock;
 import lombok.RequiredArgsConstructor;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -99,7 +97,7 @@ public class MapListener implements PacketListener {
                     packet.getBlockPosition().getZ()
             ).orElse(null);
 
-            if (fakeBlock != null && fakeBlock.placed() && (fakeBlock.isViewer(player) || fakeBlock.autoViewable()) && (packet.getBlockId() != fakeBlock.stateID() &&  packet.getBlockId() != fakeBlock.oldStateID())) {
+            if (fakeBlock != null && fakeBlock.placed() && (fakeBlock.isViewer(player) || fakeBlock.autoViewable()) && (packet.getBlockId() != fakeBlock.stateID() && packet.getBlockId() != fakeBlock.oldStateID())) {
                 event.setCancelled(true);
             }
         }

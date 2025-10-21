@@ -32,7 +32,7 @@ public class PlayerListener implements Listener {
         viewerService.unregisterPlayerChannel(event.getPlayer().getUniqueId());
     }
 
-    @EventHandler (priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.NORMAL)
     public void onPlayerJoin(PlayerJoinEvent event) {
         viewerService.registerPlayer(event.getPlayer());
     }

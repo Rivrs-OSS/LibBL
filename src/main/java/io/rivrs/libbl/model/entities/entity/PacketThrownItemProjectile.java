@@ -5,8 +5,6 @@ import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import io.rivrs.libbl.model.entities.PacketEntity;
-import io.rivrs.libbl.model.flag.ArrowFlags;
-import io.rivrs.libbl.model.flag.Flag;
 import lombok.Getter;
 import org.bukkit.Location;
 import org.bukkit.entity.EntityType;

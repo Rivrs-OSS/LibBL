@@ -7,19 +7,22 @@ import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerBlockChange;
 import io.rivrs.libbl.LibBL;
 import io.rivrs.libbl.event.block.FakeBlockAddViewerEvent;
+import io.rivrs.libbl.event.block.FakeBlockPlaceEvent;
 import io.rivrs.libbl.event.block.FakeBlockRemoveEvent;
 import io.rivrs.libbl.event.block.FakeBlockRemoveViewerEvent;
-import io.rivrs.libbl.event.block.FakeBlockPlaceEvent;
 import io.rivrs.libbl.model.ViewerHolder;
 import lombok.Getter;
 import org.apache.logging.log4j.util.InternalApi;
 import org.bukkit.*;
-import org.bukkit.block.*;
+import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.*;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArraySet;
 
@@ -27,18 +30,14 @@ import java.util.concurrent.CopyOnWriteArraySet;
 public class FakeBlock implements ViewerHolder {
 
     private final Set<UUID> viewers = new CopyOnWriteArraySet<>();
-    private boolean autoViewable = true;
-
     private final UUID uniqueID;
     private final BlockData blockData;
-    private int stateID;
     private final int oldStateID;
-
     private final Location location;
-
     private final Vector3i position;
     private final String worldName;
-
+    private boolean autoViewable = true;
+    private int stateID;
     private boolean placed;
 
     public FakeBlock(BlockData blockData, Location location) {
@@ -85,7 +84,7 @@ public class FakeBlock implements ViewerHolder {
 
     /// You should not use this. The only purpose of this is to re-place the fakeBlock in case of the break fake block event.
     @InternalApi
-    public void silentPlace(){
+    public void silentPlace() {
         this.placed = true;
         PacketWrapper<?> packet = this.buildPlacePacket();
         this.viewersAsChannel().forEach(channel -> this.sendPacket(channel, packet));
@@ -109,15 +108,15 @@ public class FakeBlock implements ViewerHolder {
         this.placed = false;
     }
 
-    public void remove(){
+    public void remove() {
         this.remove(Material.AIR.createBlockData());
     }
 
     /// This methode will attempt to put back what the server know should be at the fakeBlock position.
     ///
     /// The methode is way slower / way laggier than using remove(BlockData), use at your own risks !
-    public void smartRemove(){
-        if(!location.isWorldLoaded()){
+    public void smartRemove() {
+        if (!location.isWorldLoaded()) {
             remove();
             return;
         }
@@ -131,7 +130,7 @@ public class FakeBlock implements ViewerHolder {
 
     protected WrapperPlayServerBlockChange buildRemovePacket(BlockData blockData) {
         Integer stateID = LibBL.get().blockService().getDataState(blockData);
-        if(stateID == null){
+        if (stateID == null) {
             stateID = 0;
         }
         this.stateID = stateID;
@@ -219,7 +218,7 @@ public class FakeBlock implements ViewerHolder {
         if (!placed)
             return;
 
-        if(channel instanceof Player player){
+        if (channel instanceof Player player) {
             channel = LibBL.get().viewerService().getPlayerChannel(player.getUniqueId());
         }
 

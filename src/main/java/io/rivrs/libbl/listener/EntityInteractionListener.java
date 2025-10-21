@@ -31,7 +31,7 @@ public class EntityInteractionListener extends SimplePacketListenerAbstract {
 
                     Player player = event.getPlayer();
 
-                    if(packetEntity.location().distanceSquared(player.getLocation()) > 25){
+                    if (packetEntity.location().distanceSquared(player.getLocation()) > 25) {
                         // Too far away, the packet is likely spoofed and we ignore it
                         return;
                     }

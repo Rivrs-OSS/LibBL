@@ -46,7 +46,7 @@ public class BlockService {
     }
 
     public void register(FakeBlock fakeBlock) {
-        if(this.positionUUIDMap.containsKey(fakeBlock.location())) {
+        if (this.positionUUIDMap.containsKey(fakeBlock.location())) {
             UUID existingUUID = this.positionUUIDMap.get(fakeBlock.location());
             FakeBlock existingBlock = this.fakeBlocks.get(existingUUID);
             if (existingBlock != null) {
@@ -69,7 +69,7 @@ public class BlockService {
         this.fakeBlocks.remove(fakeBlock.uniqueID());
         this.positionUUIDMap.remove(fakeBlock.location());
         Map<Vector2i, List<UUID>> worldBlocksMap = this.worldChunkUUIDMap.get(fakeBlock.worldName());
-        if(worldBlocksMap != null) {
+        if (worldBlocksMap != null) {
             Vector2i chunkPos = new Vector2i(fakeBlock.position().x >> 4, fakeBlock.position().z >> 4);
             List<UUID> chunkBlockList = worldBlocksMap.get(chunkPos);
             if (chunkBlockList != null) {
@@ -156,7 +156,7 @@ public class BlockService {
     }
 
     @Unmodifiable
-    public Map<UUID,FakeBlock> fakeBlocks() {
+    public Map<UUID, FakeBlock> fakeBlocks() {
         return Map.copyOf(this.fakeBlocks);
     }
 
@@ -165,15 +165,15 @@ public class BlockService {
     }
 
     public void cleanUpWorld(String worldName) {
-        if(!this.worldChunkUUIDMap.containsKey(worldName))
+        if (!this.worldChunkUUIDMap.containsKey(worldName))
             return;
         Map<Vector2i, List<UUID>> chunkMap = this.worldChunkUUIDMap.get(worldName);
         World world = Bukkit.getWorld(worldName);
-        if(world == null) {
+        if (world == null) {
             chunkMap.forEach((chunkPos, uuidList) -> {
                 for (UUID uuid : uuidList) {
                     FakeBlock fakeBlock = this.fakeBlocks.get(uuid);
-                    if(fakeBlock != null) {
+                    if (fakeBlock != null) {
                         System.out.println("Cleaning up fake block at " + fakeBlock.location() + " in unloaded world " + worldName);
                         unregister(fakeBlock);
                     }
