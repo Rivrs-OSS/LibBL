@@ -23,6 +23,7 @@ import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.MainHand;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -40,6 +41,16 @@ public class MapListener implements PacketListener {
             if (!plugin.blockService().existsAtWorld(world))
                 return;
             List<FakeBlock> blocks = plugin.blockService().findByChunk(packet.getColumn().getX(), packet.getColumn().getZ(), world);
+            List<FakeBlock> processedBlocks = new ArrayList<>();
+
+            for (FakeBlock block : blocks) {
+                if (!block.isViewer(player) && !block.autoViewable())
+                    continue;
+                if (block.isAutoViewable() && !block.isViewer(player)) {
+                    block.addViewer(player);
+                }
+                processedBlocks.add(block);
+            }
 
             Column column = packet.getColumn();
 
@@ -49,16 +60,7 @@ public class MapListener implements PacketListener {
                 if (chunkSection == null)
                     continue; // Skip if this section doesn't exist
                 // Iterate over the blocks that need replacement
-                for (FakeBlock information : blocks) {
-
-                    if (!information.placed())
-                        continue;
-                    if (!information.isViewer(player) && !information.autoViewable())
-                        continue;
-
-                    if (information.isAutoViewable() && !information.isViewer(player)) {
-                        information.addViewer(player);
-                    }
+                for (FakeBlock information : processedBlocks) {
 
                     // Get world coordinates of the block
                     int worldBlockX = information.location().getBlockX();

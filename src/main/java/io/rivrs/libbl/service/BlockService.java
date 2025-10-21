@@ -114,7 +114,7 @@ public class BlockService {
             if (chunkBlockUUIDs != null) {
                 for (UUID uuid : chunkBlockUUIDs) {
                     FakeBlock block = this.fakeBlocks.get(uuid);
-                    if (block != null) {
+                    if (block != null && block.placed()) {
                         blocksInChunk.add(block);
                     }
                 }
