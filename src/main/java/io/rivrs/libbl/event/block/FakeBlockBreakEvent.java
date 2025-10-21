@@ -9,12 +9,10 @@ import org.bukkit.inventory.MainHand;
 public class FakeBlockBreakEvent extends FakeBlockEvent {
 
     private final Player player;
-    private final MainHand hand;
 
-    public FakeBlockBreakEvent(FakeBlock fakeBlock, Player player, boolean sneaking, MainHand hand) {
+    public FakeBlockBreakEvent(FakeBlock fakeBlock, Player player) {
         super(true, fakeBlock);
         this.player = player;
-        this.hand = hand;
     }
 
 }
