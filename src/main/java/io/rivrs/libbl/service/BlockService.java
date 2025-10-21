@@ -174,7 +174,6 @@ public class BlockService {
                 for (UUID uuid : uuidList) {
                     FakeBlock fakeBlock = this.fakeBlocks.get(uuid);
                     if (fakeBlock != null) {
-                        System.out.println("Cleaning up fake block at " + fakeBlock.location() + " in unloaded world " + worldName);
                         unregister(fakeBlock);
                     }
                 }
@@ -189,7 +188,7 @@ public class BlockService {
             try {
                 return SpigotConversionUtil.fromBukkitBlockData(bd).getGlobalId();
             } catch (Exception e) {
-                plugin.getLogger().warning("Failed to compute data state for block data: " + bd);
+                plugin.getLogger().warning("Failed to compute data state for block data: " + bd + e.getMessage());
                 return null;
             }
         });

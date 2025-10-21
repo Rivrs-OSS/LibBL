@@ -28,16 +28,13 @@ public class EntityVisibilityTask extends BukkitRunnable {
                 continue;
             if (!location.isWorldLoaded())
                 continue;
-            if (location.getWorld() == null)
-                continue;
             if (!location.isChunkLoaded())
                 continue;
 
             // Remove viewers that are too far away
             for (UUID uuid : entity.viewers()) {
                 Player viewer = Bukkit.getPlayer(uuid);
-                if (viewer == null || !viewer.isOnline()) {
-                    entity.removeViewer(viewer);
+                if (viewer == null) {
                     continue;
                 }
                 if (!viewer.getWorld().equals(location.getWorld())
