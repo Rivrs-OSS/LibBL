@@ -141,12 +141,17 @@ public class MapListener implements PacketListener {
 
                 FakeBlock fakeBlock = plugin.blockService().findByLocation(location).orElseThrow();
                 if (diggingPacket.getAction() == DiggingAction.FINISHED_DIGGING) {
+                    int oldSequence = fakeBlock.getSequenceId(player.getUniqueId());
+                    if(diggingPacket.getSequence() != oldSequence + 1) {
+                        return;
+                    }
                     new FakeBlockBreakEvent(fakeBlock, player).callEvent();
                     event.setCancelled(true);
-                    fakeBlock.silentPlace();
+                    fakeBlock.silentPlace(plugin.viewerService().getPlayerChannel(player.getUniqueId()));
                     WrapperPlayServerAcknowledgeBlockChanges ack = new WrapperPlayServerAcknowledgeBlockChanges(diggingPacket.getSequence());
                     event.getUser().sendPacket(ack);
                 } else {
+                    fakeBlock.setSequenceId(player.getUniqueId(), diggingPacket.getSequence());
                     WrapperPlayServerAcknowledgeBlockChanges ack = new WrapperPlayServerAcknowledgeBlockChanges(diggingPacket.getSequence());
                     event.getUser().sendPacket(ack);
                 }

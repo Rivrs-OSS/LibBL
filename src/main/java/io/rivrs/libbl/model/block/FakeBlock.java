@@ -19,11 +19,9 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 @Getter
@@ -39,6 +37,8 @@ public class FakeBlock implements ViewerHolder {
     private boolean autoViewable = true;
     private int stateID;
     private boolean placed;
+
+    private final Map<UUID, Integer> sequenceId = new ConcurrentHashMap<>();
 
     public FakeBlock(BlockData blockData, Location location) {
         this.blockData = blockData;
@@ -84,10 +84,10 @@ public class FakeBlock implements ViewerHolder {
 
     /// You should not use this. The only purpose of this is to re-place the fakeBlock in case of the break fake block event.
     @InternalApi
-    public void silentPlace() {
+    public void silentPlace(Object channel) {
         this.placed = true;
         PacketWrapper<?> packet = this.buildPlacePacket();
-        this.viewersAsChannel().forEach(channel -> this.sendPacket(channel, packet));
+        this.sendPacket(channel, packet);
     }
 
     public void remove(BlockData blockData) {
@@ -155,6 +155,7 @@ public class FakeBlock implements ViewerHolder {
             return;
 
         this.viewers.add(player.getUniqueId());
+        this.sequenceId.put(player.getUniqueId(), 0);
 
         PacketWrapper<?> packet = this.buildPlacePacket();
         this.sendPacket(player, packet);
@@ -175,6 +176,7 @@ public class FakeBlock implements ViewerHolder {
             return;
 
         this.viewers.remove(viewer.getUniqueId());
+        this.sequenceId.remove(viewer.getUniqueId());
 
         PacketWrapper<?> packet = this.buildPlacePacket();
         this.sendPacket(viewer, packet);
@@ -240,5 +242,13 @@ public class FakeBlock implements ViewerHolder {
                 protocolManager.sendPacket(channel, packetWrapper);
             }
         }
+    }
+
+    public void setSequenceId(UUID uuid, int sequenceId) {
+        this.sequenceId.put(uuid, sequenceId);
+    }
+
+    public int getSequenceId(UUID uuid) {
+        return this.sequenceId.getOrDefault(uuid, 0);
     }
 }
