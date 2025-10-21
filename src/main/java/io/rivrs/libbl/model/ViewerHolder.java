@@ -19,7 +19,10 @@ public interface ViewerHolder {
     Set<UUID> viewers();
 
     @Unmodifiable
-    List<Player> viewersAsPlayers();
+    List<Object> viewersAsChannel();
+
+    @Unmodifiable
+    List<Player> viewersAsPlayer();
 
     void autoViewable(boolean autoViewable);
 

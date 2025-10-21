@@ -7,8 +7,8 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.protocol.player.InteractionHand;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
 import io.rivrs.libbl.LibBL;
-import io.rivrs.libbl.event.PacketEntityAttackEvent;
-import io.rivrs.libbl.event.PacketEntityInteractEvent;
+import io.rivrs.libbl.event.entity.PacketEntityAttackEvent;
+import io.rivrs.libbl.event.entity.PacketEntityInteractEvent;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.MainHand;
@@ -24,14 +24,14 @@ public class EntityInteractionListener extends SimplePacketListenerAbstract {
             return;
 
         WrapperPlayClientInteractEntity packet = new WrapperPlayClientInteractEntity(event);
-        this.plugin.entities()
+        this.plugin.entityService()
                 .findById(packet.getEntityId())
                 .ifPresent(packetEntity -> {
                     event.setCancelled(true);
 
                     Player player = event.getPlayer();
 
-                    if(packetEntity.location().distanceSquared(player.getLocation()) > 20){
+                    if (packetEntity.location().distanceSquared(player.getLocation()) > 25) {
                         // Too far away, the packet is likely spoofed and we ignore it
                         return;
                     }

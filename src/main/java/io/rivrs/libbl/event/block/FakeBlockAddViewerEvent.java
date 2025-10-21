@@ -1,20 +1,20 @@
-package io.rivrs.libbl.event;
+package io.rivrs.libbl.event.block;
 
-import io.rivrs.libbl.model.entities.PacketEntity;
+import io.rivrs.libbl.model.block.FakeBlock;
 import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 
 @Getter
-public class PacketEntityAddViewerEvent extends PacketEntityEvent implements Cancellable {
+public class FakeBlockAddViewerEvent extends FakeBlockEvent implements Cancellable {
 
     private final Player player;
     private final Reason reason;
     private boolean cancelled;
 
-    public PacketEntityAddViewerEvent(PacketEntity entity, Player player, Reason reason) {
-        super(!Bukkit.isPrimaryThread(), entity);
+    public FakeBlockAddViewerEvent(FakeBlock fakeBlock, Player player, Reason reason) {
+        super(!Bukkit.isPrimaryThread(), fakeBlock);
         this.player = player;
         this.reason = reason;
     }
@@ -30,7 +30,7 @@ public class PacketEntityAddViewerEvent extends PacketEntityEvent implements Can
     }
 
     public enum Reason {
-        ENTITY_SPAWN,
+        BLOCK_PLACE,
         PLUGIN
     }
 }

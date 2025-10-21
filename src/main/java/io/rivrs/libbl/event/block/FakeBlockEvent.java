@@ -1,24 +1,24 @@
-package io.rivrs.libbl.event;
+package io.rivrs.libbl.event.block;
 
-import io.rivrs.libbl.model.entities.PacketEntity;
+import io.rivrs.libbl.model.block.FakeBlock;
 import lombok.Getter;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 import org.jetbrains.annotations.NotNull;
 
 @Getter
-public abstract class PacketEntityEvent extends Event {
+public abstract class FakeBlockEvent extends Event {
 
     private static final HandlerList HANDLERS_LIST = new HandlerList();
-    private final PacketEntity entity;
+    private final FakeBlock fakeBlock;
 
-    public PacketEntityEvent(PacketEntity entity) {
-        this.entity = entity;
+    public FakeBlockEvent(FakeBlock fakeBlock) {
+        this.fakeBlock = fakeBlock;
     }
 
-    public PacketEntityEvent(boolean isAsync, PacketEntity entity) {
+    public FakeBlockEvent(boolean isAsync, FakeBlock fakeBlock) {
         super(isAsync);
-        this.entity = entity;
+        this.fakeBlock = fakeBlock;
     }
 
     public static HandlerList getHandlerList() {
