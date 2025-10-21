@@ -45,6 +45,14 @@ public class FakeBlock implements ViewerHolder {
         Integer stateID = LibBL.get().blockService().getDataState(blockData);
         this.stateID = stateID == null ? 0 : stateID;
         this.oldStateID = stateID;
+        if(location.getX() != location.getBlockX() || location.getY() != location.getBlockY() || location.getZ() != location.getBlockZ()) {
+            location = new Location(
+                    location.getWorld(),
+                    location.getBlockX(),
+                    location.getBlockY(),
+                    location.getBlockZ()
+            );
+        }
         this.location = location;
         this.position = new Vector3i(location.getBlockX(), location.getBlockY(), location.getBlockZ());
         this.worldName = location.getWorld().getName();
