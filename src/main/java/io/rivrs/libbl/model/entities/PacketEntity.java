@@ -1,7 +1,7 @@
 package io.rivrs.libbl.model.entities;
 
 import com.github.retrooper.packetevents.PacketEvents;
-import com.github.retrooper.packetevents.manager.player.PlayerManager;
+import com.github.retrooper.packetevents.manager.protocol.ProtocolManager;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityData;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityDataTypes;
 import com.github.retrooper.packetevents.protocol.entity.data.EntityMetadataProvider;
@@ -13,10 +13,10 @@ import com.github.retrooper.packetevents.wrapper.play.server.*;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
 import io.github.retrooper.packetevents.util.SpigotReflectionUtil;
 import io.rivrs.libbl.LibBL;
-import io.rivrs.libbl.event.PacketEntityAddViewerEvent;
-import io.rivrs.libbl.event.PacketEntityDespawnEvent;
-import io.rivrs.libbl.event.PacketEntityRemoveViewerEvent;
-import io.rivrs.libbl.event.PacketEntitySpawnEvent;
+import io.rivrs.libbl.event.entity.PacketEntityAddViewerEvent;
+import io.rivrs.libbl.event.entity.PacketEntityDespawnEvent;
+import io.rivrs.libbl.event.entity.PacketEntityRemoveViewerEvent;
+import io.rivrs.libbl.event.entity.PacketEntitySpawnEvent;
 import io.rivrs.libbl.model.EquipmentType;
 import io.rivrs.libbl.model.ViewerHolder;
 import io.rivrs.libbl.model.flag.EntityFlags;
@@ -174,7 +174,7 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
 
         new PacketEntityDespawnEvent(this).callEvent();
 
-        List<Player> viewers = this.viewersAsPlayers();
+        List<Player> viewers = this.viewersAsPlayer();
         for (Player viewer : viewers) {
             new PacketEntityRemoveViewerEvent(this, viewer, PacketEntityRemoveViewerEvent.Reason.ENTITY_REMOVED).callEvent();
         }
@@ -247,11 +247,11 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
     }
 
     public void register() {
-        LibBL.get().entities().register(this);
+        LibBL.get().entityService().register(this);
     }
 
     public void unregister() {
-        LibBL.get().entities().unregister(this);
+        LibBL.get().entityService().unregister(this);
     }
 
     // Particles
@@ -556,28 +556,39 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
     public void sendPacket(PacketWrapper<?>... packetWrappers) {
         if (!alive)
             return;
-        PlayerManager playerManager = PacketEvents.getAPI().getPlayerManager();
+
+        ProtocolManager protocolManager = PacketEvents.getAPI().getProtocolManager();
 
         for (PacketWrapper<?> packetWrapper : packetWrappers) {
-            for (Player viewer : this.viewersAsPlayers()) {
-                playerManager.sendPacket(viewer, packetWrapper);
+            for (Object channel : this.viewersAsChannel()) {
+                protocolManager.sendPacket(channel, packetWrapper);
             }
         }
     }
 
-    public void sendPacket(Player player, PacketWrapper<?>... packetWrappers) {
+    public void sendPacket(Object channel, PacketWrapper<?>... packetWrappers) {
         if (!alive)
             return;
 
-        PlayerManager playerManager = PacketEvents.getAPI().getPlayerManager();
+        if(channel instanceof Player player){
+            channel = LibBL.get().viewerService().getPlayerChannel(player.getUniqueId());
+        }
+
+        ProtocolManager protocolManager = PacketEvents.getAPI().getProtocolManager();
+
         for (PacketWrapper<?> packetWrapper : packetWrappers) {
-            playerManager.sendPacket(player, packetWrapper);
+            protocolManager.sendPacket(channel, packetWrapper);
         }
     }
 
     @Override
-    public List<Player> viewersAsPlayers() {
-        return this.viewers.stream()
+    public List<Object> viewersAsChannel() {
+        return LibBL.get().viewerService().getPlayerChannels(this.viewers);
+    }
+
+    @Override
+    public List<Player> viewersAsPlayer() {
+        return viewers().stream()
                 .map(Bukkit::getPlayer)
                 .filter(Objects::nonNull)
                 .toList();
