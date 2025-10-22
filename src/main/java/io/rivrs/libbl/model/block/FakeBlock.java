@@ -104,12 +104,6 @@ public class FakeBlock implements ViewerHolder {
 
         new FakeBlockRemoveEvent(this).callEvent();
 
-        List<Player> viewers = this.viewersAsPlayer();
-        for (Player viewer : viewers) {
-            new FakeBlockRemoveViewerEvent(this, viewer, FakeBlockRemoveViewerEvent.Reason.BLOCK_REMOVED).callEvent();
-        }
-
-
         PacketWrapper<?> packet = this.buildRemovePacket(blockData);
         this.viewersAsChannel().forEach(channel -> this.sendPacket(channel, packet));
 

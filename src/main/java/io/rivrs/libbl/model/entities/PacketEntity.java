@@ -175,10 +175,6 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
         new PacketEntityDespawnEvent(this).callEvent();
 
         List<Player> viewers = this.viewersAsPlayer();
-        for (Player viewer : viewers) {
-            new PacketEntityRemoveViewerEvent(this, viewer, PacketEntityRemoveViewerEvent.Reason.ENTITY_REMOVED).callEvent();
-        }
-
         LinkedList<PacketWrapper<?>> packets = this.buildDestroyPackets();
         for (PacketWrapper<?> packet : packets) {
             for (Player viewer : viewers) {
