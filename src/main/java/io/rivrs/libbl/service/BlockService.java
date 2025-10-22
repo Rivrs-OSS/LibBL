@@ -196,6 +196,21 @@ public class BlockService {
             }
         });
     }
+    
+    public void addBlockDataToCache(BlockData blockData) {
+        if( this.dataStateCache.containsKey(blockData)) {
+            return;
+        }
+        int stateID;
+        try {
+            stateID = SpigotConversionUtil.fromBukkitBlockData(blockData).getGlobalId();
+        } catch (Exception e) {
+            plugin.getLogger().warning("Failed to compute data state for block data: " + blockData + e.getMessage());
+            return;
+        }
+        this.dataStateCache.put(blockData, stateID);
+    }
+
 
     private long getChunkKeyFromPosition(int x, int z) {
         return Chunk.getChunkKey(x>>4, z>>4);
