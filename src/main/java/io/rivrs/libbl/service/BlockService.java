@@ -7,6 +7,7 @@ import io.rivrs.libbl.model.block.FakeBlock;
 import io.rivrs.libbl.utils.ThreadSafeLong2ObjectMap;
 import lombok.RequiredArgsConstructor;
 import org.bukkit.Bukkit;
+import org.bukkit.Chunk;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.data.BlockData;
@@ -110,7 +111,7 @@ public class BlockService {
     public List<FakeBlock> findByChunk(int chunkX, int chunkZ, World world) {
         List<FakeBlock> blocksInChunk = new ArrayList<>();
 
-        long chunkKey = getChunkKey(chunkX, chunkZ);
+        long chunkKey = Chunk.getChunkKey(chunkX, chunkZ);
         ThreadSafeLong2ObjectMap<List<UUID>> worldBlocks = this.worldChunkUUIDMap.get(world.getName());
         if (worldBlocks != null) {
             List<UUID> chunkBlockUUIDs = worldBlocks.get(chunkKey);
@@ -196,10 +197,7 @@ public class BlockService {
         });
     }
 
-    private long getChunkKey(int x, int z) {
-        return (long) x & 4294967295L | ((long)z & 4294967295L) << 32;
-    }
     private long getChunkKeyFromPosition(int x, int z) {
-        return (long) (x>>4) & 4294967295L | ((long)(z>>4) & 4294967295L) << 32;
+        return Chunk.getChunkKey(x>>4, z>>4);
     }
 }
