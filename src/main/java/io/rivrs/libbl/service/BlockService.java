@@ -55,11 +55,14 @@ public class BlockService {
         }
         this.fakeBlocks.put(fakeBlock.uniqueID(), fakeBlock);
 
-        long chunkLong = ((long) (fakeBlock.position().z >> 4) << 32) | ((fakeBlock.position().x >> 4) & 0xFFFFFFFFL);
-        ThreadSafeLong2ObjectMap<List<UUID>> worldBlocks = this.worldChunkUUIDMap.computeIfAbsent(fakeBlock.worldName(), k -> new ThreadSafeLong2ObjectMap<>( new CopyOnWriteArrayList<>()));
-        List<UUID> chunkBlockList = worldBlocks.get(chunkLong);
+        long chunkKey = getChunkKeyFromPosition(fakeBlock.position().x, fakeBlock.position().z);
+        ThreadSafeLong2ObjectMap<List<UUID>> worldBlocks = this.worldChunkUUIDMap.computeIfAbsent(fakeBlock.worldName(), k -> new ThreadSafeLong2ObjectMap<>());
+        List<UUID> chunkBlockList = worldBlocks.get(chunkKey);
+        if (chunkBlockList == null) {
+            chunkBlockList = new CopyOnWriteArrayList<>();
+        }
         chunkBlockList.add(fakeBlock.uniqueID());
-        worldBlocks.put(chunkLong, chunkBlockList);
+        worldBlocks.put(chunkKey, chunkBlockList);
         this.worldChunkUUIDMap.put(fakeBlock.worldName(), worldBlocks);
 
         this.positionUUIDMap.put(fakeBlock.location(), fakeBlock.uniqueID());
@@ -71,11 +74,11 @@ public class BlockService {
         this.positionUUIDMap.remove(fakeBlock.location());
         ThreadSafeLong2ObjectMap<List<UUID>> worldBlocks = this.worldChunkUUIDMap.get(fakeBlock.worldName());
         if (worldBlocks != null) {
-            long chunkLong = ((long) (fakeBlock.position().z >> 4) << 32) | ((fakeBlock.position().x >> 4) & 0xFFFFFFFFL);
-            List<UUID> chunkBlockList = worldBlocks.get(chunkLong);
+            long chunkKey = getChunkKeyFromPosition(fakeBlock.position().x, fakeBlock.position().z);
+            List<UUID> chunkBlockList = worldBlocks.get(chunkKey);
             if (chunkBlockList != null) {
                 chunkBlockList.remove(fakeBlock.uniqueID());
-                worldBlocks.put(chunkLong, chunkBlockList);
+                worldBlocks.put(chunkKey, chunkBlockList);
                 this.worldChunkUUIDMap.put(fakeBlock.worldName(), worldBlocks);
             }
         }
@@ -107,10 +110,10 @@ public class BlockService {
     public List<FakeBlock> findByChunk(int chunkX, int chunkZ, World world) {
         List<FakeBlock> blocksInChunk = new ArrayList<>();
 
-        long chunkLong = ((long) chunkZ << 32) | (chunkX & 0xFFFFFFFFL);
+        long chunkKey = getChunkKey(chunkX, chunkZ);
         ThreadSafeLong2ObjectMap<List<UUID>> worldBlocks = this.worldChunkUUIDMap.get(world.getName());
         if (worldBlocks != null) {
-            List<UUID> chunkBlockUUIDs = worldBlocks.get(chunkLong);
+            List<UUID> chunkBlockUUIDs = worldBlocks.get(chunkKey);
             if (chunkBlockUUIDs != null) {
                 for (UUID uuid : chunkBlockUUIDs) {
                     FakeBlock block = this.fakeBlocks.get(uuid);
@@ -120,7 +123,6 @@ public class BlockService {
                 }
             }
         }
-
         return blocksInChunk;
     }
 
@@ -192,5 +194,12 @@ public class BlockService {
                 return null;
             }
         });
+    }
+
+    private long getChunkKey(int x, int z) {
+        return (long) x & 4294967295L | ((long)z & 4294967295L) << 32;
+    }
+    private long getChunkKeyFromPosition(int x, int z) {
+        return (long) (x>>4) & 4294967295L | ((long)(z>>4) & 4294967295L) << 32;
     }
 }
