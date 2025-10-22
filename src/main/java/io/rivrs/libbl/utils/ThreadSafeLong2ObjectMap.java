@@ -11,15 +11,14 @@ public class ThreadSafeLong2ObjectMap<V> {
     private final Long2ObjectMap<V> map;
     private final ReentrantLock[] locks;
 
-    public ThreadSafeLong2ObjectMap(V v) {
-        this(16, v); // default: 16 stripes
+    public ThreadSafeLong2ObjectMap() {
+        this(16); // default: 16 stripes
     }
 
-    public ThreadSafeLong2ObjectMap(int stripes, V v) {
+    public ThreadSafeLong2ObjectMap(int stripes) {
         if (Integer.bitCount(stripes) != 1)
             throw new IllegalArgumentException("Stripes must be a power of two for hashing efficiency");
         this.map = new Long2ObjectOpenHashMap<>();
-        map.defaultReturnValue(v);
         this.locks = new ReentrantLock[stripes];
         for (int i = 0; i < stripes; i++) locks[i] = new ReentrantLock();
     }
