@@ -121,8 +121,12 @@ public class MapListener implements PacketListener {
                         packet.getBlockPosition().getZ()
                 );
 
-                MainHand hand = packet.getHand().equals(InteractionHand.MAIN_HAND) ? MainHand.RIGHT : MainHand.LEFT;
                 FakeBlock fakeBlock = plugin.blockService().findByLocation(location).orElseThrow();
+
+                if(!fakeBlock.isViewer(player)) {
+                    return;
+                }
+                MainHand hand = packet.getHand().equals(InteractionHand.MAIN_HAND) ? MainHand.RIGHT : MainHand.LEFT;
 
                 new FakeBlockInteractEvent(fakeBlock, player, false, hand).callEvent();
             }
@@ -142,6 +146,11 @@ public class MapListener implements PacketListener {
                 );
 
                 FakeBlock fakeBlock = plugin.blockService().findByLocation(location).orElseThrow();
+
+                if(!fakeBlock.isViewer(player)) {
+                    return;
+                }
+
                 if (diggingPacket.getAction() == DiggingAction.FINISHED_DIGGING) {
                     int oldSequence = fakeBlock.getSequenceId(player.getUniqueId());
                     if(diggingPacket.getSequence() != oldSequence + 1) {
