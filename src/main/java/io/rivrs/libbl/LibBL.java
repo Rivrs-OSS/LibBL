@@ -50,7 +50,7 @@ public final class LibBL extends JavaPlugin {
 
         // Listeners
         PacketEvents.getAPI().getEventManager().registerListener(new EntityInteractionListener(this));
-        PacketEvents.getAPI().getEventManager().registerListener(new MapListener(this), PacketListenerPriority.MONITOR);
+        PacketEvents.getAPI().getEventManager().registerListener(new MapListener(this), PacketListenerPriority.HIGHEST);
 
         instance = this;
 
