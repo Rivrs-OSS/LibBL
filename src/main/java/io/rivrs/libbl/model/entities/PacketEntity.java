@@ -37,6 +37,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 @Getter
@@ -52,6 +53,8 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
     protected final Set<PacketEntity> passengersIds = new CopyOnWriteArraySet<>();
     // Metadata
     private final Set<Flag> flags = new HashSet<>();
+    // Attributes
+    protected final List<WrapperPlayServerUpdateAttributes.Property> properties = new CopyOnWriteArrayList<>();
     // Velocity
     protected Vector3d velocity;
     // Data
@@ -126,6 +129,9 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
             if (this.hasPassengers()) {
                 this.sendPacket(player, this.buildSetPassengersPacket());
             }
+            if(!this.properties.isEmpty()){
+                this.sendPacket(player, this.buildAttributePacket());
+            }
         });
         if (velocity != null)
             packets.add(this.buildVelocityPacket());
@@ -193,18 +199,21 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
         return packets;
     }
 
-    public void updateAttributes(Player player, List<WrapperPlayServerUpdateAttributes.Property> properties) {
-        this.sendPacket(player, new WrapperPlayServerUpdateAttributes(
+    protected WrapperPlayServerUpdateAttributes buildAttributePacket() {
+        return new WrapperPlayServerUpdateAttributes(
                 this.id,
-                properties
-        ));
+                this.properties
+        );
+    }
+
+    public void updateAttributes(Player player, List<WrapperPlayServerUpdateAttributes.Property> properties) {
+        this.properties.addAll(properties);
+        this.sendPacket(player, buildAttributePacket());
     }
 
     public void updateAttributes(List<WrapperPlayServerUpdateAttributes.Property> properties) {
-        this.sendPacket(new WrapperPlayServerUpdateAttributes(
-                this.id,
-                properties
-        ));
+        this.properties.addAll(properties);
+        this.sendPacket(buildAttributePacket());
     }
 
     public void customName(Component customName) {
