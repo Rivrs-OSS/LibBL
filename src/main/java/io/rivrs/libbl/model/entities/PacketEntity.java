@@ -27,6 +27,7 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Particle;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Pose;
@@ -51,6 +52,8 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
     protected final Set<UUID> viewers = new CopyOnWriteArraySet<>();
     // Passengers
     protected final Set<PacketEntity> passengersIds = new CopyOnWriteArraySet<>();
+    // Vehicle
+    protected int vehicleId = -1;
     // Metadata
     private final Set<Flag> flags = new HashSet<>();
     // Attributes
@@ -132,6 +135,9 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
             if(!this.properties.isEmpty()){
                 this.sendPacket(player, this.buildAttributePacket());
             }
+            if(this.vehicleId != -1){
+                this.sendPacket(player, this.buildSetVehiclePacket());
+            }
         });
         if (velocity != null)
             packets.add(this.buildVelocityPacket());
@@ -197,6 +203,32 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
         packets.add(this.buildDestroyPacket());
 
         return packets;
+    }
+
+    protected WrapperPlayServerSetPassengers buildSetVehiclePacket() {
+        Entity vehicle = SpigotConversionUtil.getEntityById(location.getWorld(), this.vehicleId);
+        int[] passengers = new int[]{this.id};
+        if(vehicle != null){
+            List<Entity> passengerEntities = vehicle.getPassengers();
+            int[] passengerIds = passengerEntities.stream().mapToInt(Entity::getEntityId).toArray();
+            passengers = new int[passengerIds.length + 1];
+            System.arraycopy(passengerIds, 0, passengers, 0, passengerIds.length);
+            passengers[passengers.length - 1] = id;
+        }
+        return new WrapperPlayServerSetPassengers(
+                this.vehicleId,
+                passengers
+        );
+    }
+
+    public void setVehicleId(Player player, int id) {
+        this.vehicleId = id;
+        this.sendPacket(player, buildSetVehiclePacket());
+    }
+
+    public void setVehicleId(int id) {
+        this.vehicleId = id;
+        this.sendPacket(buildSetVehiclePacket());
     }
 
     protected WrapperPlayServerUpdateAttributes buildAttributePacket() {
