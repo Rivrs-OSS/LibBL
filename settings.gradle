@@ -1,15 +1,1 @@
-pluginManagement {
-    repositories {
-        maven {
-            url = settings.rivrsNexusUrl + "/repository/squid-snapshot/"
-            allowInsecureProtocol = true
-
-            credentials {
-                username = settings.rivrsNexusUsername
-                password = settings.rivrsNexusPassword
-            }
-        }
-        gradlePluginPortal()
-    }
-}
 rootProject.name = 'LibBl'
