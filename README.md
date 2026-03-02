@@ -1,6 +1,6 @@
 # LibBL - Life is better Bukkit less
 
-[![GitHub](https://img.shields.io/github/license/Rivrs-OSS/LibBL)](https://github.com/Rivrs-OSS/LibBL/blob/master/LICENSE) [![](https://jitpack.io/v/Rivrs-OSS/LibBL.svg)](https://jitpack.io/#Rivrs-OSS/LibBL)
+[![GitHub](https://img.shields.io/github/license/Rivrs-OSS/LibBL)](https://github.com/Rivrs-OSS/LibBL/blob/main/LICENSE) [![](https://jitpack.io/v/Rivrs-OSS/LibBL.svg)](https://jitpack.io/#Rivrs-OSS/LibBL)
 
 LibBL is a system designed to help developers create packet based work without the hassle of managing it.
 
