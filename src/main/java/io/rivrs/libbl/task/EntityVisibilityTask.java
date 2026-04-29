@@ -48,8 +48,6 @@ public class EntityVisibilityTask extends BukkitRunnable {
                         && onlinePlayer.getLocation().distanceSquared(location) < LibBL.ENTITY_SIMULATION_DISTANCE_SQR())
                     entity.addViewer(onlinePlayer);
             }
-
-            entity.processScheduledActions(System.currentTimeMillis());
         }
 
     }

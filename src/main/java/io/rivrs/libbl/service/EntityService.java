@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.*;
 
 @RequiredArgsConstructor
 public class EntityService {
@@ -21,9 +21,19 @@ public class EntityService {
     private final List<PacketEntity> entities = new CopyOnWriteArrayList<>();
     private EntityVisibilityTask visibilityTask;
 
+    private final ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledFuture<?> updateLoopFuture;
+
     public void init() {
         this.visibilityTask = new EntityVisibilityTask(this);
         this.visibilityTask.runTaskTimerAsynchronously(this.plugin, 0, 5);
+        updateLoopFuture = executor.scheduleAtFixedRate(() -> {
+            try {
+                entities.forEach(entity -> entity.processScheduledActions(System.currentTimeMillis()));
+            } catch (Exception e) {
+                this.plugin.getSLF4JLogger().error("Exception thrown in skill update loop", e);
+            }
+        }, 0, LibBL.ENTITY_UPDATE_RATE(), TimeUnit.MILLISECONDS);
     }
 
     public void shutdown() {
