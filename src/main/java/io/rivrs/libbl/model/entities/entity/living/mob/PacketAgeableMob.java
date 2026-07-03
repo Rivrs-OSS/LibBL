@@ -17,6 +17,9 @@ public abstract class PacketAgeableMob extends PacketMob {
     @Getter
     private boolean isBaby;
 
+    @Getter
+    private boolean ageLocked;
+
     public PacketAgeableMob(EntityType type, Location location) {
         super(type, location);
     }
@@ -31,7 +34,11 @@ public abstract class PacketAgeableMob extends PacketMob {
 
     public void baby(boolean baby) {
         this.isBaby = baby;
+        this.sendPacket(this.buildMetadataPacket());
+    }
 
+    public void ageLocked(boolean ageLocked) {
+        this.ageLocked = ageLocked;
         this.sendPacket(this.buildMetadataPacket());
     }
 
@@ -40,6 +47,7 @@ public abstract class PacketAgeableMob extends PacketMob {
     public List<EntityData<?>> entityData(@NotNull ClientVersion clientVersion) {
         List<EntityData<?>> entityData = super.entityData(clientVersion);
         entityData.add(new EntityData<>(16, EntityDataTypes.BOOLEAN, this.isBaby));
+        entityData.add(new EntityData<>(17, EntityDataTypes.BOOLEAN, this.ageLocked));
         return entityData;
     }
 }

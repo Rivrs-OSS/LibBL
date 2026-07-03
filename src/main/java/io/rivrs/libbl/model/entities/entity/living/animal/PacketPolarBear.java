@@ -28,7 +28,7 @@ public class PacketPolarBear extends PacketAnimal {
         super(id, uniqueId, EntityType.POLAR_BEAR, location);
     }
 
-    public void standingUp(boolean boost) {
+    public void standingUp(boolean standingUp) {
         this.standingUp = standingUp;
 
         this.sendPacket(this.buildMetadataPacket());
@@ -37,7 +37,7 @@ public class PacketPolarBear extends PacketAnimal {
     @Override
     public List<EntityData<?>> entityData(@NotNull ClientVersion clientVersion) {
         List<EntityData<?>> entityData = super.entityData(clientVersion);
-        entityData.add(new EntityData<>(17, EntityDataTypes.BOOLEAN, this.standingUp));
+        entityData.add(new EntityData<>(18, EntityDataTypes.BOOLEAN, this.standingUp));
         return entityData;
     }
 }
