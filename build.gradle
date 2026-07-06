@@ -21,8 +21,8 @@ dependencies {
     paperweight.paperDevBundle("26.1.2.build.72-stable")
     compileOnly("com.github.retrooper:packetevents-spigot:2.13.0")
 
-    compileOnly 'org.projectlombok:lombok:1.18.46'
-    annotationProcessor 'org.projectlombok:lombok:1.18.46'
+    compileOnly 'org.projectlombok:lombok:1.+'
+    annotationProcessor 'org.projectlombok:lombok:1.+'
 }
 
 def targetJavaVersion = 25

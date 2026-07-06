@@ -20,6 +20,8 @@ public final class LibBL extends JavaPlugin {
     private static int ENTITY_SIMULATION_DISTANCE_SQR;
     @Getter
     private static int RENDER_DISTANCE_SQR;
+    @Getter
+    private static int ENTITY_UPDATE_RATE;
 
     private EntityService entityService;
     private BlockService blockService;
@@ -36,6 +38,9 @@ public final class LibBL extends JavaPlugin {
         ENTITY_SIMULATION_DISTANCE_SQR = simulationDistance * simulationDistance;
         int renderDistance = this.getServer().getViewDistance() * 16;
         RENDER_DISTANCE_SQR = renderDistance * renderDistance;
+
+        saveDefaultConfig();
+        ENTITY_UPDATE_RATE = this.getConfig().getInt("entity-update-rate", 250);
 
         this.entityService = new EntityService(this);
         this.entityService.init();

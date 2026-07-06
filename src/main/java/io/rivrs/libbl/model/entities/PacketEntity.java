@@ -38,8 +38,10 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.lang.reflect.Array;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.function.Consumer;
 
 @Getter
 public abstract class PacketEntity implements EntityMetadataProvider, ViewerHolder {
@@ -73,6 +75,8 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
     protected boolean autoViewable = true;
     // State
     protected boolean alive;
+    // PacketEntityConsumer
+    protected Map<Long,Set<Consumer<PacketEntity>>> consumers = new ConcurrentHashMap<>();
 
     public PacketEntity(EntityType type, Location location) {
         this(SpigotReflectionUtil.generateEntityId(), UUID.randomUUID(), type, location);
@@ -615,6 +619,20 @@ public abstract class PacketEntity implements EntityMetadataProvider, ViewerHold
 
         for (PacketWrapper<?> packetWrapper : packetWrappers) {
             protocolManager.sendPacket(channel, packetWrapper);
+        }
+    }
+
+    public void addScheduledAction(long time, Consumer<PacketEntity> consumer) {
+        this.consumers.computeIfAbsent(time, k -> new HashSet<>()).add(consumer);
+    }
+
+    public void processScheduledActions(long now){
+        List<Long> processKeys = consumers.keySet().stream().filter(time -> time <= now).toList();
+        if (processKeys.isEmpty())
+            return;
+        for (Long key : processKeys) {
+            Set<Consumer<PacketEntity>> toConsume = consumers.remove(key);
+            toConsume.forEach(consumer -> consumer.accept(this));
         }
     }
 
