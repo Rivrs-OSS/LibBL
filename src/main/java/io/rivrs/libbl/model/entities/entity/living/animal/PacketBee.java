@@ -16,7 +16,7 @@ import java.util.UUID;
 @Getter
 public class PacketBee extends PacketAnimal {
 
-    private int angerTime = 0;
+    private long angerTime = 0;
 
     public PacketBee(Location location) {
         super(EntityType.BEE, location);
@@ -30,7 +30,7 @@ public class PacketBee extends PacketAnimal {
         super(id, uniqueId, EntityType.BEE, location);
     }
 
-    public void angerTime(int angerTime) {
+    public void angerTime(long angerTime) {
         this.angerTime = angerTime;
         this.sendPacket(this.buildMetadataPacket());
     }
@@ -38,8 +38,8 @@ public class PacketBee extends PacketAnimal {
     @Override
     public List<EntityData<?>> entityData(@NotNull ClientVersion clientVersion) {
         List<EntityData<?>> entityData = super.entityData(clientVersion);
-        entityData.add(new EntityData<>(17, EntityDataTypes.BYTE, Flag.toBitMask(this.flags(BeeFlags.class))));
-        entityData.add(new EntityData<>(18, EntityDataTypes.INT, this.angerTime));
+        entityData.add(new EntityData<>(18, EntityDataTypes.BYTE, Flag.toBitMask(this.flags(BeeFlags.class))));
+        entityData.add(new EntityData<>(19, EntityDataTypes.LONG, this.angerTime));
         return entityData;
     }
 

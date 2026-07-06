@@ -44,8 +44,8 @@ public class PacketDolphin extends PacketAnimal {
     @Override
     public List<EntityData<?>> entityData(@NotNull ClientVersion clientVersion) {
         List<EntityData<?>> entityData = super.entityData(clientVersion);
-        entityData.add(new EntityData<>(17, EntityDataTypes.BOOLEAN, this.hasFish));
-        entityData.add(new EntityData<>(18, EntityDataTypes.INT, this.moistureLevel));
+        entityData.add(new EntityData<>(18, EntityDataTypes.BOOLEAN, this.hasFish));
+        entityData.add(new EntityData<>(19, EntityDataTypes.INT, this.moistureLevel));
         return entityData;
     }
 }
